@@ -1,49 +1,29 @@
 from django.db import models
+from enum import Enum
 
-# Create your models here.
-class EC2(models.Model):
-    organization_id = models.IntegerField()
-    vpc_id = models.IntegerField()
-    name = models.CharField(max_length = 1000)
-    instance_id = models.CharField(max_length = 1000, unique=True)
-    instance_type = models.CharField(max_length = 1000)
-    os = models.CharField(max_length = 1000)
+class OrganisationType(Enum):
+    DIRECT = 'direct'
+    MSP = 'msp'
+    MSP_ORG = 'msp_org'
 
-    INSTANCE_STATUS_CHOICES = (
-        ('running', 'Running'),
-        ('stopped', 'Stopped'),
-    )
+class OrganisationStatus(Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
 
-    instance_status = models.CharField(max_length=20, choices=INSTANCE_STATUS_CHOICES)
+class OrganisationAuthType(Enum):
+    SSO = 'sso'
+    LOGIN = 'login'
 
-    public_dns = models.CharField(max_length = 1000, unique=True)
-    public_ip = models.CharField(max_length = 1000, unique=True)
-    private_ip = models.CharField(max_length = 1000, unique=True)
-
-    AGENT_STATUS_CHOICES = (
-        ('disconnected', 'Disconnected'),
-        ('connected', 'Connected'),
-    )
-
-    agent_status = models.CharField(max_length=20, choices=AGENT_STATUS_CHOICES)
-
-    create_at = models.DateTimeField(editable=False)
-    updated_at = models.DateTimeField(editable=False)
-
-class ElasticIps(models.Model):
-    organization_id = models.IntegerField()
-    ec2_id = models.IntegerField()
-    ip = models.CharField(max_length = 1000, unique=True)
-    private_ip = models.CharField(max_length = 1000, unique=True)
-    reverse_dns = models.CharField(max_length = 1000, unique=True)
-
-
-    IP_CHOICES = (
-        ('public_ip', 'Public IP'),
-        ('private_ip', 'Private IP'),
-    )
-
-    ip_type = models.CharField(max_length=20, choices=IP_CHOICES)
-
-    create_at = models.DateTimeField(editable=False)
-    updated_at = models.DateTimeField(editable=False)
+class Organisations(models.Model):
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=20, choices=[(tag.value, tag.name.title()) for tag in OrganisationType])
+    is_client = models.BooleanField(default=False)
+    domain_name = models.CharField(max_length=255)
+    organisation_status = models.CharField(max_length=20, choices=[(tag.value, tag.name.title()) for tag in OrganisationStatus], default=OrganisationStatus.INACTIVE.value)
+    short_name = models.CharField(max_length=255)
+    dar_logo = models.CharField(max_length=255, default = '', null = True)
+    light_logo = models.CharField(max_length=255, default = '', null = True)
+    auth_type = models.CharField(max_length=20, choices=[(tag.value, tag.name.title()) for tag in OrganisationAuthType], default=OrganisationAuthType.LOGIN.value)
+    parent_msp_id = models.BigIntegerField(null = True)
+    create_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import *
+from .views import fetchAndSaveOrganisationsDetails
 
 urlpatterns = [
-    path('fetch-mysql-data-ec2/', fetchMySqlDataEc2),
-    path('fetch-mysql-data-elastic-ips/', fetchMySqlDataElasticIps),
+    path('fetch-and-save-organisations-details/', fetchAndSaveOrganisationsDetails),
 ]

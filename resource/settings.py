@@ -79,23 +79,23 @@ WSGI_APPLICATION = 'resource.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': config('DB_ENGINE_NEW'),
-#         'NAME': config('DB_NAME_NEW'),
-#         'USER': config('DB_USER_NEW'),
-#         'PASSWORD': config('DB_PASSWORD_NEW'),
-#         'HOST': config('DB_HOST_NEW'),
-#         'PORT': config('DB_PORT_NEW'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': config('DB_ENGINE_NEW'),
+        'NAME': config('DB_NAME_NEW'),
+        'USER': config('DB_USER_NEW'),
+        'PASSWORD': config('DB_PASSWORD_NEW'),
+        'HOST': config('DB_HOST_NEW'),
+        'PORT': config('DB_PORT_NEW'),
+    }
+}
 
 
 
@@ -141,7 +141,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ENGINE= config('DB_ENGINE'),
-NAME= config('DB_NAME'),
+DB_NAME= config('DB_NAME'),
 USER= config('DB_USER'),
 PASSWORD= config('DB_PASSWORD'),
 HOST= config('DB_HOST'),
