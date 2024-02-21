@@ -50,7 +50,7 @@ def create_ec2_instance(request):
             instance_id = response['Instances'][0]['InstanceId']
 
             def run_background_task():
-                time.sleep(60)  # Waiting for 1 minute
+                time.sleep(25)  # Waiting for 1 minute
                 savingOnDb = get_instance_details(instance_id, aws_region)
 
             background_thread = threading.Thread(target=run_background_task)
