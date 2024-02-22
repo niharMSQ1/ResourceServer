@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
+import requests
 
 from .models import *
 
@@ -109,6 +110,8 @@ def ec2_association_elastic_ips(instance_id, elastic_ip, aws_region):
 
                 with transaction.atomic():
                     savingElasticIpObj.save()
+
+                get_all_instances = requests.get('http://127.0.0.1:8002/api/get-all-instances/')
 
                 return JsonResponse({
                     'reverse_dns': reverse_dns,
