@@ -32,11 +32,12 @@ def get_instance_details(instanceId, region_name):
         instance_name = (response["Reservations"][0]["Instances"][0]["Tags"][0])['Value']
 
 
-        response = ec2_client.describe_vpcs(VpcIds=[vpc_id])
-        if 'Vpcs' in response and len(response['Vpcs']) > 0:
-            vpc_details = response['Vpcs'][0]
-            checkVpcInstance = Vpc.objects.filter(vpc_id =vpc_id).exists()
-            if not checkVpcInstance:
+        checkVpcInstance = Vpc.objects.filter(vpc_id =vpc_id).exists()
+        if not checkVpcInstance:
+            response = ec2_client.describe_vpcs(VpcIds=[vpc_id])
+            if 'Vpcs' in response and len(response['Vpcs']) > 0:
+                vpc_details = response['Vpcs'][0]
+                
                 cidr_block = vpc_details.get('CidrBlock', '')
 
                 vpcObjCreate = Vpc(
@@ -94,24 +95,36 @@ def ec2_association_elastic_ips(instance_id, elastic_ip, aws_region):
 
             private_ip = address.get('PrivateIpAddress', '')
 
-            savingElasticIpObj = Elastic_Ips(
-                ec2_id = Ec2.objects.get(instance_id = instance_id),
-                ip = elastic_ip,
-                private_ip = private_ip,
-                reverse_dns = reverse_dns,
-                type = ip_type,
-                created_at = timezone.now(),
-                updated_at = timezone.now(),
-            )
+            # checkElasticIpObj = (Elastic_Ips.objects.get(ip = elastic_ip)).exists()
 
-            with transaction.atomic():
-                savingElasticIpObj.save()
+            if (Elastic_Ips.objects.filter(ip = elastic_ip)).exists() == False:
+                savingElasticIpObj = Elastic_Ips(
+                    ec2_id = Ec2.objects.get(instance_id = instance_id),
+                    ip = elastic_ip,
+                    private_ip = private_ip,
+                    reverse_dns = reverse_dns if reverse_dns else None,
+                    elastic_ip_type = ip_type,
+                    created_at = timezone.now(),
+                )
 
-            return JsonResponse({
-                'reverse_dns': reverse_dns,
-                'type': ip_type,
-                'private_ip': private_ip
-            })
+                with transaction.atomic():
+                    savingElasticIpObj.save()
+
+                return JsonResponse({
+                    'reverse_dns': reverse_dns,
+                    'type': ip_type,
+                    'private_ip': private_ip
+                })
+            
+            elif (Elastic_Ips.objects.filter(ip = elastic_ip)).exists() == True:
+                elasticIpUpdate = (Elastic_Ips.objects.get(ip = elastic_ip))
+                
+                elasticIpUpdate.private_ip = private_ip
+                elasticIpUpdate.reverse_dns = reverse_dns if reverse_dns else None,
+                elasticIpUpdate.elastic_ip_type = ip_type
+                elasticIpUpdate.ec2_id = Ec2.objects.get(instance_id = instance_id)
+                elasticIpUpdate.updated_at = timezone.now()
+                elasticIpUpdate.save()
         else:
             return JsonResponse({'error': 'Elastic IP address not found.'})
     except Exception as e:

@@ -43,13 +43,13 @@ class Vpc(models.Model):
 class Ec2(models.Model):
     instance_type = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
-    organisation_id = models.ForeignKey(Organisation, on_delete = models.CASCADE)
+    organisation_id = models.ForeignKey(Organisation, on_delete = models.CASCADE, null = True)
     vpc_id = models.ForeignKey(Vpc, on_delete = models.CASCADE)
     private_dns_name = models.CharField(max_length=255)
     private_ip_address = models.CharField(max_length=50)
     public_dns_name = models.CharField(max_length=255)
     public_ip_address = models.CharField(max_length=50)
-    instance_name = models.CharField(max_length=255)
+    instance_name = models.CharField(max_length=255, unique = True)
     instance_id = models.CharField(max_length=100)
     aws_region = models.CharField(max_length=100)
 
@@ -59,14 +59,30 @@ class Ec2(models.Model):
 class Elastic_ip_type(Enum):
     PUBLIC_IP = "Public IP"
     PRIVATE_IP = "Private IP"
+
+class Elastic_Ip_Current_Association(Enum):
+    ASSOCIATED = 'associated'
+    NOT_ASSOICATED = "disassociated"
 class Elastic_Ips(models.Model):
-    ec2_id = models.ForeignKey(Ec2, on_delete = models.CASCADE)
+    ec2_id = models.ForeignKey(Ec2, on_delete = models.CASCADE, null = True)
     ip = models.CharField(max_length=45)
-    private_ip = models.CharField(max_length=45)
+    private_ip = models.CharField(max_length=45, null = True)
     reverse_dns = models.CharField(max_length=255, null=True)
-    organisation_id = models.ForeignKey(Organisation, on_delete = models.CASCADE)
-    elastic_ip_type =  models.CharField(max_length=20, choices=[(tag.value, tag.name) for tag in Elastic_ip_type], default=Elastic_ip_type.PUBLIC_IP.value)
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    organisation_id = models.ForeignKey(Organisation, on_delete = models.CASCADE, null = True)
+    elastic_ip_type =  models.CharField(max_length=20, choices=[(tag.value, tag.name) for tag in Elastic_ip_type], default=Elastic_ip_type.PUBLIC_IP.value, null = True)
+    created_at = models.DateTimeField(null = True)
+    updated_at = models.DateTimeField(null = True)
 
+class Elastric_ip_status(Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+class Elastic_Ips_Ec2_Relation(models.Model):
+    elastic_ip = models.ForeignKey(Elastic_Ips, on_delete = models.CASCADE)
+    elastic_ip_str = models.CharField(max_length=255, null=True)
+    ec2_id = models.ForeignKey(Ec2, on_delete = models.CASCADE, null = True)
+    ec2_id_str = models.CharField(max_length=255, null=True)
+    ec2_status = models.CharField(max_length=100, null = True)
+    elastic_ip_status = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.elastic_ip
