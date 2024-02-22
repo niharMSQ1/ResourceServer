@@ -128,6 +128,8 @@ def ec2_association_elastic_ips(instance_id, elastic_ip, aws_region):
                 elasticIpUpdate.ec2_id = Ec2.objects.get(instance_id = instance_id)
                 elasticIpUpdate.updated_at = timezone.now()
                 elasticIpUpdate.save()
+
+                get_all_instances = requests.get('http://127.0.0.1:8002/api/get-all-instances/')
         else:
             return JsonResponse({'error': 'Elastic IP address not found.'})
     except Exception as e:

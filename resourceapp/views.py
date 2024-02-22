@@ -92,7 +92,16 @@ def create_elastic_ip_and_allocate_ec2(request):
 
             response = ec2_client.describe_addresses()
 
-            allocation_id = (response['Addresses'])[0]['AllocationId']
+            allocationIdList = []
+            for address in response['Addresses']:
+                if len(allocationIdList) == 1:
+                    pass
+                else:
+                    if elastic_ip == address['PublicIp']:
+                        allocationIdList.append(address['AllocationId'])
+
+            allocation_id = allocationIdList[0]
+
             try:
                 ec2_client.associate_address(InstanceId=instance_id, AllocationId=allocation_id)
 
